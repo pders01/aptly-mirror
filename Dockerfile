@@ -2,6 +2,12 @@ FROM debian:bookworm-slim
 
 ARG APTLY_UID=1000
 ARG APTLY_GID=1000
+ARG GIT_SHA=unknown
+
+LABEL org.opencontainers.image.source="https://github.com/pders01/aptly-mirror" \
+      org.opencontainers.image.description="Aptly-based Debian mirror with non-root runtime" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.revision="${GIT_SHA}"
 
 # Pull aptly from upstream repo — Debian's package lags releases.
 # https://www.aptly.info/download/

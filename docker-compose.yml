@@ -1,0 +1,22 @@
+services:
+  aptly:
+    image: urpylka/aptly:latest
+    container_name: aptly
+    profiles: ["cli"]
+    volumes:
+      - ./data:/var/lib/aptly
+      - ./gnupg:/root/.gnupg:ro
+      - ./aptly.conf:/etc/aptly.conf:ro
+    environment:
+      GNUPGHOME: /root/.gnupg
+    entrypoint: ["aptly"]
+
+  nginx:
+    image: nginx:alpine
+    container_name: aptly-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./data/public:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro

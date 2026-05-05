@@ -1,7 +1,11 @@
 services:
   aptly:
-    build: .
-    image: ghcr.io/pders01/aptly:latest
+    # Pull-only. Bump tag when rebuilding via:
+    #   docker buildx build --platform linux/amd64,linux/arm64 \
+    #     --build-arg GIT_SHA=$(git rev-parse --short HEAD) \
+    #     -t ghcr.io/pders01/aptly:latest \
+    #     -t ghcr.io/pders01/aptly:$(git rev-parse --short HEAD) --push .
+    image: ghcr.io/pders01/aptly:493aaf1
     container_name: aptly
     profiles: ["cli"]
     user: "1000:1000"

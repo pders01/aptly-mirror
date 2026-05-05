@@ -1,22 +1,51 @@
 services:
   aptly:
-    image: urpylka/aptly:latest
+    build: .
+    image: ghcr.io/pders01/aptly:latest
     container_name: aptly
     profiles: ["cli"]
+    user: "1000:1000"
+    read_only: false  # aptly writes to /var/lib/aptly
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 1g
+    pids_limit: 256
     volumes:
       - ./data:/var/lib/aptly
-      - ./gnupg:/root/.gnupg:ro
+      - ./gnupg:/home/aptly/.gnupg:ro
       - ./aptly.conf:/etc/aptly.conf:ro
     environment:
-      GNUPGHOME: /root/.gnupg
+      GNUPGHOME: /home/aptly/.gnupg
+      PASSPHRASE_FILE: /home/aptly/.gnupg/passphrase
     entrypoint: ["aptly"]
 
-  nginx:
-    image: nginx:alpine
-    container_name: aptly-nginx
+  caddy:
+    image: caddy:2-alpine
+    container_name: aptly-caddy
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    cap_add: ["NET_BIND_SERVICE"]
+    mem_limit: 256m
+    pids_limit: 128
     ports:
       - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
     volumes:
-      - ./data/public:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data/public:/srv/apt:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    tmpfs:
+      - /tmp:size=16m
+    environment:
+      APT_DOMAIN: "${APT_DOMAIN:?set APT_DOMAIN to public hostname}"
+      ACME_EMAIL: "${ACME_EMAIL:?set ACME_EMAIL for Let's Encrypt}"
+
+volumes:
+  caddy_data:
+  caddy_config:

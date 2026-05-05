@@ -1,0 +1,43 @@
+{
+	email {$ACME_EMAIL}
+	servers {
+		protocols h1 h2 h3
+	}
+}
+
+{$APT_DOMAIN} {
+	root * /srv/apt
+	encode zstd gzip
+	file_server browse
+
+	# Block dotfiles except ACME well-known.
+	@dotfiles {
+		path_regexp dotfile ^/\.(?!well-known)
+	}
+	respond @dotfiles 404
+
+	# .deb / .udeb are immutable by content hash — long-cache.
+	@debs {
+		path *.deb *.udeb
+	}
+	header @debs Cache-Control "public, max-age=31536000, immutable"
+
+	# Release metadata changes each publish — never cache.
+	@release {
+		path_regexp release /(InRelease|Release|Release\.gpg|Packages(\.gz|\.xz)?|Sources(\.gz|\.xz)?)$
+	}
+	header @release Cache-Control "no-cache"
+
+	# Security headers. APT itself doesn't render HTML; autoindex page benefits.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

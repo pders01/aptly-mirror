@@ -10,7 +10,7 @@ LOCAL_REPO="custom"
 DIST="stable"
 COMPONENT="main"
 GPG_KEY="${GPG_KEY:?set GPG_KEY to signing key fingerprint or uid}"
-PASSPHRASE_FILE="${PASSPHRASE_FILE:-/root/.gnupg/passphrase}"
+PASSPHRASE_FILE="${PASSPHRASE_FILE:-/home/aptly/.gnupg/passphrase}"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 
 run() { docker compose run --rm aptly "$@"; }

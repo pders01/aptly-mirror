@@ -29,6 +29,7 @@ Ranked risks:
 | Static-asset cache rules | `.deb` immutable, `Release` no-cache | `Caddyfile` |
 | HSTS + nosniff + Server hide | Security headers on autoindex | `Caddyfile` |
 | Aptly upstream key pinning | `signed-by=/etc/apt/keyrings/aptly.gpg` | `Dockerfile` |
+| IP allowlist | Caddy `@denied` matcher + `ALLOWED_IPS` env | `Caddyfile` |
 | Sign-only subkey workflow | Master stays offline, 1y subkey on host | `scripts/setup-signing-subkey.sh` |
 
 ## What still needs operator action
@@ -37,8 +38,10 @@ These are **not** automated. Do them manually before exposing the mirror.
 
 ### Required
 
-- Set `APT_DOMAIN` and `ACME_EMAIL` in environment / `.env` before
-  `docker compose up`. Without these Caddy refuses to start.
+- Set `APT_DOMAIN`, `ACME_EMAIL`, `ALLOWED_IPS` in environment / `.env`
+  before `docker compose up`. Without these Caddy refuses to start.
+  `ALLOWED_IPS` is space-separated CIDR list — only those clients may pull.
+  Use `0.0.0.0/0 ::/0` to make the mirror fully public.
 - Run `scripts/setup-signing-subkey.sh <master-fp>` on your workstation. Copy
   resulting `gnupg/` to deploy host with `rsync -a --chmod=700`. Move the
   generated `*.rev` revocation cert offline.

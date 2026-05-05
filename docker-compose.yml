@@ -49,6 +49,7 @@ services:
     environment:
       APT_DOMAIN: "${APT_DOMAIN:?set APT_DOMAIN to public hostname}"
       ACME_EMAIL: "${ACME_EMAIL:?set ACME_EMAIL for Let's Encrypt}"
+      ALLOWED_IPS: "${ALLOWED_IPS:?set ALLOWED_IPS to space-separated CIDRs}"
 
 volumes:
   caddy_data:
